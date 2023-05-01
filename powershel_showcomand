@@ -8,8 +8,8 @@ function getcode {
     @('重複ファイル検索', '重複ファイル検索_recursive' ,
     '連番ファイル作成', '連番ファイル作成_値入力'
     '対象ファイルの合計サイズ_recursive','エイリアス表示',
-    '表示結果excel出力'
-    )
+    '表示結果excel出力','Excelファイル分割(任意の列の特定の値ごと',
+    '時間計測', '複数csvをExcelの各シートにまとめる')
 
     $index = 1
     foreach ($selection in $selections) {
@@ -42,6 +42,23 @@ function getcode {
             Write-Host '前提条件：ImportExcelモジュールがインストールされていること'
             Write-Host 'インストールしてない場合、Import-Module ImportExcel'
             Write-Host '表示したい結果 | export-excel test.xlsx'
+        }
+        '8' {
+            # 要改善(2mbファイルで10分程かかる)
+            Write-Host '前提条件：ImportExcelモジュールがインストールされていること'
+            Write-Host 'インストールしてない場合、Import-Module ImportExcel'
+            Write-Host '表示したい結果 | export-excel test.xlsx'
+            Write-Host 'import-excel -path .\sample.xlsx -worksheetname "<シート名>" | group-object "<グループ対象列1>", "<グループ対象列2>" | %{ $_.Group | export-excel -path ("{0}_{1}.xlsx" -f $_.Group[0]."<グループ対象列1>", $_.Group[0]."<グループ対象列2>")}'
+        }
+        '9' {
+            # 
+            Write-Host 'ls *.xlsx | %{Import-Excel $_} | sort -p "<グループ対象列1>", @{Expression="<グループ対象列2>";Descending=$true} | export-excel out.xlsx'
+        }
+        '10' {
+            Write-Host 'Measure-Command {<コマンド>}'
+        }
+        '11' {
+            Write-Host 'gci *.csv | %{Import-CSV $_ | Export-Excel -path out.xlsx -w $_.BaseName}'
         }
     }
 }
