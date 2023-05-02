@@ -9,7 +9,11 @@ function getcode {
     '連番ファイル作成', '連番ファイル作成_値入力'
     '対象ファイルの合計サイズ_recursive','エイリアス表示',
     '表示結果excel出力','Excelファイル分割(任意の列の特定の値ごと',
-    '時間計測', '複数csvをExcelの各シートにまとめる')
+    '時間計測', '複数csvをExcelの各シートにまとめる',
+    '特定の文字列を含むファイルパス取得',　'検索文字列のファイルパス出力',
+    'csvファイルから特定の文字列を含む行を抽出しcsvに出力',
+    '複数csvファイルから特定の文字列を含む行を抽出しcsvに出力',
+    '複数exelからcsvに変換')
 
     $index = 1
     foreach ($selection in $selections) {
@@ -60,5 +64,55 @@ function getcode {
         '11' {
             Write-Host 'gci *.csv | %{Import-CSV $_ | Export-Excel -path out.xlsx -w $_.BaseName}'
         }
+        '12' {
+            # excel対象外
+            Write-Host 'gci -r -File | Select-String -pattern "<検索したい文字列>" | Select Path -uniq'
+        }
+        '13'{
+            # 破損したcsvには適用できない
+            Write-Host '$csv = Import-Csv .\<対象ファイル名>.csv -Encoding Default'
+            Write-Host '$csv | Where-Object { $_.<列名> -match ".*<検索文字列>.*" } | Export-Csv ./result.csv -Encoding Shift_JIS -NoTypeInformation'
+        }
+        '14'{
+            # 破損したcsvには適用できない
+            Write-Host "step1 ni test.ps1"
+            Write-Host "step2 ni 下記のコードをtest.p1に張り付ける"
+
+            Write-Host 'function ex4 {
+                param (
+                    [string]$SearchColumns,
+                    [string]$SearchString,
+                    [string]$ResultFileName
+                )
+
+                $csvFiles = Get-ChildItem -Path (Get-Location) -Filter *.csv
+
+                # 結果を格納する空の配列を作成
+                $results = @()
+
+                foreach ($file in $csvFiles) {
+                    Write-Host "Processing file: $($file.FullName)"
+                    $csv = Import-Csv -Path $file.FullName -Encoding Shift_JIS
+                    $filteredRows = $csv | Where-Object { $_.$SearchColumns -match ".*$SearchString.*" }
+                    $filteredRows | ForEach-Object { Write-Host "Matched row: $($_)" }
+                    
+                    # 結果をまとめる配列にフィルタリングされた行を追加
+                    $results += $filteredRows
+                }
+
+                # 最後に結果を1つのCSVファイルに出力
+                $results | Export-Csv $ResultFileName -Encoding Shift_JIS -NoTypeInformation
+            }'
+            Write-Host "step3 「. ./test.ps1」 で読み込む"
+            Write-Host "step4 「ex4  <列名> <検索文字列> <./結果ファイル名>」で実行" 
+        }
+        '15'{
+            # ${}でやるとなぜか上手くいかないので下記の方法。csvは元のexcelの2倍のサイズになる。
+            Write-Host '$files = gci *.xlsx'
+            Write-Host 'foreach ($file in $files) {
+                        $ex = Import-Excel $file.FullName
+                        $csvFile = Join-Path $file.DirectoryName ($file.BaseName + ".csv")
+                        $ex | Export-Csv $csvFile -Encoding Shift_JIS -NoTypeInformation }'
+        }
+        }
     }
-}
