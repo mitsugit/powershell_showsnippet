@@ -1,19 +1,21 @@
 function getcode {
     # powershellのコマンドを表示する
     # Ubuntu環境でも使用できるコマンド
+    # UTF-8 with BOMで保存してから使用すること
 
     param()
 
     $selections = 
-    @('重複ファイル検索', '重複ファイル検索_recursive' ,
-    '連番ファイル作成', '連番ファイル作成_値入力'
+    @('重複ファイル検索', '重複ファイル検索_recursive',
+    '連番ファイル作成', '連番ファイル作成_値入力',
     '対象ファイルの合計サイズ_recursive','エイリアス表示',
     '表示結果excel出力','Excelファイル分割(任意の列の特定の値ごと',
     '時間計測', '複数csvをExcelの各シートにまとめる',
-    '特定の文字列を含むファイルパス取得',　'検索文字列のファイルパス出力',
+    '特定の文字列を含むファイルパス取得', '検索文字列のファイルパス出力',
     'csvファイルから特定の文字列を含む行を抽出しcsvに出力',
     '複数csvファイルから特定の文字列を含む行を抽出しcsvに出力',
-    '複数exelからcsvに変換')
+    '複数exelからcsvに変換',
+    'フォルダ内ファイル名変更')
 
     $index = 1
     foreach ($selection in $selections) {
@@ -114,5 +116,10 @@ function getcode {
                         $csvFile = Join-Path $file.DirectoryName ($file.BaseName + ".csv")
                         $ex | Export-Csv $csvFile -Encoding Shift_JIS -NoTypeInformation }'
         }
+        '16'{
+            # フォルダ内ファイル名変更
+            Write-Host '$folderPath = "<フォルダパス>"'
+            Write-Host 'gci -Path $folderPath -File | Rename-Item -NewName { $_.Name -replace "<置換前文字列>", "<置換後文字列>" }'
         }
+    }
     }
